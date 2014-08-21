@@ -28,7 +28,7 @@ function Thread(setup,handler){
 		setup = function(){};
 	}
 	
-	var txt = '';
+	var txt = '',i;
 	
 	txt += 'var handler = ' + handler + ';';
 	
@@ -41,7 +41,10 @@ function Thread(setup,handler){
 		'handler(e.data[0],answer.bind({tag: e.data[1]}));' +
 	'});';
 	
-	txt += '(' + setup + ')();postMessage("ready");'
+	if(setup instanceof Array) for(i = 0;i < setup.length;i++) txt += '(' + setup[i] + ')();'
+	else txt += '(' + setup + ')();'
+	
+	txt += 'postMessage("ready");'
 	
 	var blob = new Blob([txt],{type: 'text/javascript'}),
 			url = URL.createObjectURL(blob),
