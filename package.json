@@ -1,6 +1,6 @@
 {
   "name": "vz.thread",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Threads implementation for the browser, using the WebWorker API",
   "main": "main.js",
   "repository": {
