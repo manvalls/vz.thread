@@ -4,7 +4,7 @@
 
 **Note:** This package is supposed to be used in a browser context using a tool like browserify
 
-## Example ussage:
+## Sample usage:
 
 ```javascript
 
