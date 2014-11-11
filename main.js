@@ -1,23 +1,23 @@
-var Property = require('vz.property'),
+var Su = require('vz.rand').Su,
     
-    worker = new Property(),
-    url = new Property(),
-    ready = new Property(),
-		awaiting = new Property(),
-		tasks = new Property(),
-		nextTag = new Property();
+    worker = Su(),
+    url = Su(),
+    ready = Su(),
+		awaiting = Su(),
+		tasks = Su(),
+		nextTag = Su();
 
 function onMessage(e){
-	var task = tasks.of(this.that).get()[e.data[1]];
+	var task = this.that[tasks][e.data[1]];
 	task.cb.call(task.that,e.data[0]);
 }
 
 function onReady(e){
-	ready.of(this.that).set(true);
+	this.that[ready] = true;
 	this.onmessage = onMessage;
 	
 	var args;
-	while(args = awaiting.of(this.that).get().shift()) this.that.run.apply(this.that,args);
+	while(args = this.that[awaiting].shift()) this.that.run.apply(this.that,args);
 }
 
 function Thread(setup,handler){
@@ -52,24 +52,24 @@ function Thread(setup,handler){
 	w.onmessage = onReady;
 	w.that = this;
 	
-  worker.of(this).set(w);
-  url.of(this).set(u);
-  ready.of(this).set(false);
-  awaiting.of(this).set([]);
-  tasks.of(this).set({});
-  nextTag.of(this).set(0);
+  this[worker] = w;
+  this[url] = u;
+  this[ready] = false;
+  this[awaiting] = [];
+  this[tasks] = {};
+  this[nextTag] = 0;
   
 }
 
 module.exports = Thread;
 
 Thread.prototype.run = function(data,trans,callback,that){
-	if(!ready.of(this).get()){
-    awaiting.of(this).get().push(arguments);
+	if(!this[ready]){
+    this[awaiting].push(arguments);
 		return;
 	}
 	
-	var tag = nextTag.of(this).value++;
+	var tag = this[nextTag]++;
 	
 	if(typeof trans == 'function'){
 		that = callback;
@@ -77,14 +77,14 @@ Thread.prototype.run = function(data,trans,callback,that){
 		trans = null;
 	}
 	
-	if(trans) worker.of(this).get().postMessage([data,tag],trans);
-	else worker.of(this).get().postMessage([data,tag]);
+	if(trans) this[worker].postMessage([data,tag],trans);
+	else this[worker].postMessage([data,tag]);
 	
-	tasks.of(this).get()[tag] = {cb: callback,that: that || this};
+	this[tasks][tag] = {cb: callback,that: that || this};
 };
 
 Thread.prototype.destroy = function(){
-	worker.of(this).get().terminate();
-	URL.revokeObjectURL(url.of(this).get());
+	this[worker].terminate();
+	URL.revokeObjectURL(this[url]);
 };
 
